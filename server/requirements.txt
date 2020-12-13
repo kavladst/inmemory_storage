@@ -1,0 +1,5 @@
+bcrypt==3.2.0
+werkzeug==0.16.1
+flask-restplus==0.13.0
+APScheduler==3.6.3
+python-decouple==3.3

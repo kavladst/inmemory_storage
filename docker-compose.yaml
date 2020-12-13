@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+
+  server:
+    build:
+      context: server/
+    restart: always
+    ports:
+      - 8000:8000
+
+  client:
+    build:
+      context: client/
+    restart: always
+    command: python3 main.py
+    environment:
+      API_URL: "http://server:8000/"
+    ports:
+      - 8080:8080
+    depends_on:
+      - server
