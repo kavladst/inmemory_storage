@@ -33,11 +33,14 @@ class RequestRouter:
 
         params['user_id'] = self._user_id
         response = self._get_response_for_request(method, params)
+        if response is None:
+            return 'Not find URL in API'
         try:
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             return str(e)
         response_data = response.json()
+
         if 'response' in response_data:
             if method == consts.LOGIN or method == consts.REGISTER:
                 self._user_id = response_data['login']
@@ -47,23 +50,22 @@ class RequestRouter:
     @staticmethod
     def _get_parsed_params_by_method(method: str, params_list: List[str]
                                      ) -> Optional[dict]:
-        params = None
         if method == consts.LOGIN or method == consts.REGISTER:
             if len(params_list) != 2:
                 return
-            params = {'login': params_list[0], 'password': params_list[1]}
+            return {'login': params_list[0], 'password': params_list[1]}
         elif method == consts.GET:
             if len(params_list) != 1:
                 return
-            params = {'key': params_list[0]}
+            return {'key': params_list[0]}
         elif method == consts.HGET:
             if len(params_list) != 2:
                 return
-            params = {'key': params_list[0], 'field': params_list[1]}
+            return {'key': params_list[0], 'field': params_list[1]}
         elif method == consts.LGET:
             if len(params_list) != 2:
                 return
-            params = {'key': params_list[0], 'index': params_list[1]}
+            return {'key': params_list[0], 'index': params_list[1]}
         elif method == consts.SET:
             params = {}
             for attr in ('nx', 'xx'):
@@ -82,10 +84,11 @@ class RequestRouter:
                 return
             params['key'] = params_list[0]
             params['value'] = params_list[1]
+            return params
         elif method == consts.HSET:
             if len(params_list) < 3 and len(params_list) % 2 == 0:
                 return
-            params = {
+            return {
                 'key': params_list[0],
                 'fields': ','.join(
                     params_list[i] for i in range(1, len(params_list), 2)
@@ -96,7 +99,7 @@ class RequestRouter:
         elif method == consts.LSET:
             if len(params_list) != 3:
                 return
-            params = {
+            return {
                 'key': params_list[0],
                 'index': params_list[1],
                 'value': params_list[2],
@@ -104,15 +107,15 @@ class RequestRouter:
         elif method == consts.DEL:
             if len(params_list) == 0:
                 return
-            params = {'keys': ','.join(params_list)}
+            return {'keys': ','.join(params_list)}
         elif method == consts.KEYS:
             if len(params_list):
                 return
-            params = {}
+            return {}
         elif method == consts.RPUSH:
             if len(params_list) < 2:
                 return
-            params = {
+            return {
                 'key': params_list[0],
                 'values': ','.join(
                     (params_list[i] for i in range(1, len(params_list)))
@@ -121,11 +124,11 @@ class RequestRouter:
         elif method == consts.SAVE:
             if len(params_list):
                 return
-            params = {}
-        return params
+            return {}
 
     @staticmethod
-    def _get_response_for_request(method: str, params: dict) -> Response:
+    def _get_response_for_request(method: str, params: dict
+                                  ) -> Optional[Response]:
         request_type = consts.REQUEST_TYPE_FOR_METHODS[method]
         if request_type == consts.GET_REQUEST_TYPE:
             return requests.get(
