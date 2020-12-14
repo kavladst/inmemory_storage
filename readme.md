@@ -78,4 +78,8 @@
         SAVE
         OK
 
-PS: Swagger REST доступен в корневом пути (http://localhost:8000/)
+Выход:
+
+    QUIT
+
+PS: Swagger REST доступен в корневом пути (http://localhost:8000/). Доступен только для демонстрации
